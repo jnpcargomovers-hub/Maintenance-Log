@@ -146,19 +146,37 @@
         </div>
       </div>
 
-      <!-- 8 & 9. Open Time and Close Time -->
-      <div class="grid grid-cols-2 gap-2.5">
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">
-            8. Open Time / शुरू समय
-          </label>
-          <input type="time" id="openTime" class="w-full border rounded-xl p-2.5 bg-slate-50 font-semibold" />
+      <!-- 8. Open Date & Time Section -->
+      <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+        <label class="block text-xs font-bold text-indigo-900 uppercase mb-1.5">
+          8. Work Opened / काम शुरू विवरण
+        </label>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <span class="block text-[10px] text-slate-500 font-bold uppercase mb-0.5">Open Date *</span>
+            <input type="date" id="openDate" required class="w-full border rounded-xl p-2 bg-white text-xs font-semibold" />
+          </div>
+          <div>
+            <span class="block text-[10px] text-slate-500 font-bold uppercase mb-0.5">Open Time</span>
+            <input type="time" id="openTime" class="w-full border rounded-xl p-2 bg-white text-xs font-semibold" />
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">
-            9. Close Time / समापन समय
-          </label>
-          <input type="time" id="closeTime" class="w-full border rounded-xl p-2.5 bg-slate-50 font-semibold" />
+      </div>
+
+      <!-- 9. Close Date & Time Section -->
+      <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+        <label class="block text-xs font-bold text-indigo-900 uppercase mb-1.5">
+          9. Work Closed / काम पूरा विवरण
+        </label>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <span class="block text-[10px] text-slate-500 font-bold uppercase mb-0.5">Close Date</span>
+            <input type="date" id="closeDate" class="w-full border rounded-xl p-2 bg-white text-xs font-semibold" />
+          </div>
+          <div>
+            <span class="block text-[10px] text-slate-500 font-bold uppercase mb-0.5">Close Time</span>
+            <input type="time" id="closeTime" class="w-full border rounded-xl p-2 bg-white text-xs font-semibold" />
+          </div>
         </div>
       </div>
 
@@ -223,7 +241,6 @@
   </div>
 
   <script>
-    // Live Web App URL for JNP_Maintenance_Log_DB
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4ENNlf6vYrUe-8d4beOLit-YX7U2Dna0fH5ZCSuUKQLmlACrlryHB8scjvird7otI/exec";
 
     let lastSavedData = null;
@@ -238,6 +255,10 @@
     };
 
     window.addEventListener('DOMContentLoaded', () => {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('openDate').value = today;
+      document.getElementById('closeDate').value = today;
+
       populateStaff(masterData.staff);
       renderChecklist(masterData.checklist);
       toggleOutsideVendor();
@@ -401,8 +422,10 @@
         amcService: document.getElementById('amcService').value,
         outsideVendor: document.getElementById('vendorInput').value.trim(),
         services: selectedServices,
-        openTime: document.getElementById('openTime').value || "N/A",
-        closeTime: document.getElementById('closeTime').value || "N/A",
+        openDate: document.getElementById('openDate').value || "",
+        openTime: document.getElementById('openTime').value || "",
+        closeDate: document.getElementById('closeDate').value || "",
+        closeTime: document.getElementById('closeTime').value || "",
         billAmount: billVal,
         approvedBy: document.getElementById('approverInput').value.trim(),
         remark: document.getElementById('remarkInput').value.trim() || "-"
@@ -436,6 +459,9 @@
       const servicesText = lastSavedData.services.length > 0 ? lastSavedData.services.join(", ") : "General Inspection";
       const vendorName = lastSavedData.amcService === "Yes" ? "Authorized AMC Workshop" : lastSavedData.outsideVendor;
 
+      const openStr = lastSavedData.openDate + (lastSavedData.openTime ? " " + lastSavedData.openTime : "");
+      const closeStr = lastSavedData.closeDate + (lastSavedData.closeTime ? " " + lastSavedData.closeTime : "");
+
       const msg = 
 `🛠️ *FLEET MAINTENANCE LOG*
 ━━━━━━━━━━━━━━━━━━
@@ -446,7 +472,8 @@
 🏢 *Service:* ${lastSavedData.amcService === 'Yes' ? 'AMC Center' : 'Outside Workshop'}
 🏪 *Workshop:* ${vendorName}
 ✅ *Checklist Done:* ${servicesText}
-⏱️ *Time:* ${lastSavedData.openTime} to ${lastSavedData.closeTime}
+📅 *Opened:* ${openStr}
+📅 *Closed:* ${closeStr}
 💰 *Bill Amount:* ₹${lastSavedData.billAmount}
 ✍️ *Approved By:* ${lastSavedData.approvedBy}
 📝 *Remark:* ${lastSavedData.remark}
@@ -459,6 +486,10 @@
 
     function resetForm() {
       document.getElementById('maintForm').reset();
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('openDate').value = today;
+      document.getElementById('closeDate').value = today;
+
       document.getElementById('maintForm').classList.remove('opacity-50', 'pointer-events-none');
       document.getElementById('shareSection').classList.add('hidden');
       document.getElementById('staffCustom').classList.add('hidden');
